@@ -2,30 +2,55 @@ module Day01 where
 
 import Commons
 
-strToInt :: String -> Integer
-strToInt (x:xs) | x == '-'  = (read (x:xs) :: Integer)
-                | otherwise = (read xs :: Integer)
+strToInt :: String -> Int
+strToInt (x:xs) | x == '-'  = read (x:xs) :: Int
+                | otherwise = read xs :: Int
 
-parseInput :: String -> [Integer]
+parseInput :: String -> [Int]
 parseInput = map strToInt . lines
 
-ns1 = [1,-2,3,1]
-ns2 = [1,-1]
-ns3 = [3,3,4,-2,-4]
-ns4 = [-6,3,8,5,-6]
-ns5 = [7,7,-2,-7,-4]
+-- Exemplary inputs
+ns1 :: ([Int],Int)
+ns1 = ([1,-2,3,1], 2)
+ns2 :: ([Int],Int)
+ns2 = ([1,-1], 0)
+ns3 :: ([Int],Int)
+ns3 = ([3,3,4,-2,-4], 10)
+ns4 :: ([Int],Int)
+ns4 = ([-6,3,8,5,-6], 5)
+ns5 :: ([Int],Int)
+ns5 = ([7,7,-2,-7,-4], 14)
 
-test :: [Integer] -> [Integer] -> Integer -> Integer
+testCase :: ([Int],Int) -> IO ()
+testCase xs = do putStr "\nInput: "
+                 putStr $ show (fst xs)
+                 putStr " Expected: "
+                 print (snd xs)
+                 putStr "Result: "
+                 let result = test (cycle (fst xs)) [] 0
+                 if result == snd xs then
+                    putStrLn "PASSED!"
+                 else
+                    putStrLn ("FAILED! (expected " ++ show (snd xs) ++ " but was " ++ show result ++ ")")
+                 return ()
+
+runTests :: IO ()
+runTests = do testCase ns1
+              testCase ns2
+              testCase ns3
+              testCase ns4
+              testCase ns5
+
+test :: [Int] -> [Int] -> Int -> Int
 test (x:xs) cs freq | freq `elem` cs = freq
-                    | otherwise      = test xs (freq:cs) (x+freq)
-        
+                    | otherwise      = test xs (freq:cs) (x+freq)        
           
 solution :: IO ()
 solution = do putStrLn "Part 01";
               numbers <- parseInput <$> getInput "input_01.txt";
-              putStrLn $ show $ sum numbers
+              print (sum numbers)
               putStrLn "Part 02"
-              putStrLn $ show $ test (cycle numbers) [] 0
+              print (test (cycle numbers) [] 0)
 
 
 
