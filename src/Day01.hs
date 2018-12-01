@@ -1,6 +1,9 @@
 module Day01 where
 
 import Commons
+import Data.Set (Set)
+import qualified Data.Set as Set
+
 
 strToInt :: String -> Int
 strToInt (x:xs) | x == '-'  = read (x:xs) :: Int
@@ -43,16 +46,19 @@ runTests = do testCase ns1
 
 test :: [Int] -> [Int] -> Int -> Int
 test (x:xs) cs freq | freq `elem` cs = freq
-                    | otherwise      = test xs (freq:cs) (x+freq)        
+                    | otherwise      = test xs (freq:cs) (x+freq)      
+
+test' :: [Int] -> Set Int -> Int -> Int
+test' (x:xs) set freq | freq `Set.member` set = freq
+                      | otherwise             = test' xs (freq `Set.insert` set) (x+freq)
           
 solution :: IO ()
 solution = do putStrLn "Part 01";
               numbers <- parseInput <$> getInput "input_01.txt";
               print (sum numbers)
               putStrLn "Part 02"
-              print (test (cycle numbers) [] 0)
-
-
+              print (test' (cycle numbers) Set.empty 0)
+              
 
               
               
