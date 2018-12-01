@@ -12,3 +12,11 @@ getInput name =
        []    -> readFile name
        "-":_ -> getContents
        fn:_  -> readFile fn
+
+
+strToInt :: String -> Int
+strToInt (x:xs) | x == '-'  = read (x:xs) :: Int
+                | otherwise = read xs :: Int
+
+
+                

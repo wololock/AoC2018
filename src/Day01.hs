@@ -4,15 +4,23 @@ import Commons
 import Data.Set (Set)
 import qualified Data.Set as Set
 
-
-strToInt :: String -> Int
-strToInt (x:xs) | x == '-'  = read (x:xs) :: Int
-                | otherwise = read xs :: Int
-
 parseInput :: String -> [Int]
 parseInput = map strToInt . lines
+   
+findFirstFreqCycle :: [Int] -> Set Int -> Int -> Int
+findFirstFreqCycle (x:xs) set freq | freq `Set.member` set = freq
+                                   | otherwise             = findFirstFreqCycle xs (freq `Set.insert` set) (x+freq)
+          
+solution :: IO ()
+solution = do putStr "Part 01: ";
+              numbers <- parseInput <$> getInput "input_01.txt";
+              print (sum numbers)
+              putStr "Part 02: "
+              print (findFirstFreqCycle (cycle numbers) Set.empty 0)
 
--- Exemplary inputs
+
+
+-- A few more tests with exemplary inputs
 ns1 :: ([Int],Int)
 ns1 = ([1,-2,3,1], 2)
 ns2 :: ([Int],Int)
@@ -30,7 +38,7 @@ testCase xs = do putStr "\nInput: "
                  putStr " Expected: "
                  print (snd xs)
                  putStr "Result: "
-                 let result = test (cycle (fst xs)) [] 0
+                 let result = findFirstFreqCycle (cycle (fst xs)) Set.empty 0
                  if result == snd xs then
                     putStrLn "PASSED!"
                  else
@@ -43,23 +51,4 @@ runTests = do testCase ns1
               testCase ns3
               testCase ns4
               testCase ns5
-
-test :: [Int] -> [Int] -> Int -> Int
-test (x:xs) cs freq | freq `elem` cs = freq
-                    | otherwise      = test xs (freq:cs) (x+freq)      
-
-test' :: [Int] -> Set Int -> Int -> Int
-test' (x:xs) set freq | freq `Set.member` set = freq
-                      | otherwise             = test' xs (freq `Set.insert` set) (x+freq)
-          
-solution :: IO ()
-solution = do putStrLn "Part 01";
-              numbers <- parseInput <$> getInput "input_01.txt";
-              print (sum numbers)
-              putStrLn "Part 02"
-              print (test' (cycle numbers) Set.empty 0)
-              
-
-              
-              
 
