@@ -18,5 +18,13 @@ strToInt :: String -> Int
 strToInt (x:xs) | x == '-'  = read (x:xs) :: Int
                 | otherwise = read xs :: Int
 
+split :: Eq a => (a -> Bool) -> [a] -> [[a]]
+split _ [] = []
+split p s  = before : (split p after)
+             where
+             	before = takeWhile p s
+             	after  = drop (length before + 1) s
+
+
 
                 
