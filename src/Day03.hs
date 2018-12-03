@@ -5,10 +5,11 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 
 
---parseInput :: String -> [String]
-parseInput xs = map (\x -> rect (parseCoords (x !! 0)) (parseWidthLenght (x !! 1))) $ map (\x -> drop 2 (words x)) $ lines xs
-
 type Coord = (Int,Int)
+type Rect = (Coord, Coord)
+
+parseInput :: String -> [Rect]
+parseInput xs = map (\x -> rect (parseCoords (x !! 0)) (parseWidthLenght (x !! 1))) $ map (\x -> drop 2 (words x)) $ lines xs
 
 -- Ex. "141,223:" --> (141,223)
 parseCoords :: String -> Coord
@@ -26,8 +27,6 @@ parseWidthLenght xs = (x,y)
                         x      = read (parsed !! 0) :: Int
                         y      = read (parsed !! 1) :: Int
 
-
-type Rect = (Coord, Coord)
 
 rect :: Coord -> Coord -> Rect
 rect (x,y) (w,h) | w < 1     = error "Width must be greater or equal 1"
@@ -52,8 +51,17 @@ totalIntersection :: [Rect] -> Set Coord -> Set Coord
 totalIntersection [] acc     = acc
 totalIntersection (r:rs) acc = totalIntersection rs (foldl (\rs' r' -> (intersection r r') `Set.union` rs') acc rs)
 
+bestClaim :: [Rect] -> Int
+bestClaim rs = findBestClaim rs rs 1
+
+findBestClaim :: [Rect] -> [Rect] -> Int -> Int
+findBestClaim (r:rs) rs' n | all (\r' -> if r == r' then True else not (overlap r r')) rs' = n
+                           | otherwise                                                     = findBestClaim rs rs' (n+1)
+                         
 
 solution :: IO ()
 solution = do putStr "Part 01: ";
               input <- parseInput <$> getInput "input_03.txt";
               print (length $ totalIntersection input Set.empty)
+              putStr "Part 02: ";
+              print (bestClaim input)
