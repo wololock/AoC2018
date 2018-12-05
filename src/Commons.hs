@@ -22,9 +22,10 @@ split :: Eq a => (a -> Bool) -> [a] -> [[a]]
 split _ [] = []
 split p s  = before : (split p after)
              where
-             	before = takeWhile p s
-             	after  = drop (length before + 1) s
+                before = takeWhile p s
+                after  = drop (length before + 1) s
 
-
-
-                
+chunk :: Int -> [a] -> [[a]]
+chunk n list = unfoldr takeList list
+               where takeList [] = Nothing
+                     takeList l  = Just $ splitAt n l
