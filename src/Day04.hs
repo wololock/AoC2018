@@ -61,18 +61,33 @@ parseInput = groupRows . sortBy (\(a,_) (b,_) -> compare a b) . map parseRow . g
 groupRows :: [Guard] -> [Guard]
 groupRows rs = map (\row -> foldl (\(id,ds) (id',ds') -> (id', ds ++ ds')) (0,[]) row) $ groupBy (\(a,_) (b,_) -> a == b) rs
 
+
+-- Solution Part 1
 part01 :: [Guard] -> Int
 part01 xs = id * mostFreq
             where
-              gs         = map (\(id,ts) -> (id, sum $ map duration ts)) xs
-              (id,_)     = maximumBy (\(_,a) (_,b) -> compare a b) gs
-              (_,sleeps) = head $ filter (\(id',_) -> id == id') xs
-              minutes    = sort $ concatMap sleepingMinutes sleeps
-              mostFreq   = head $ maximumBy (\a b -> compare (length a) (length b)) $ group minutes
+              gs          = map (\(id,ts) -> (id, sort $ concatMap sleepingMinutes ts)) xs
+              (id,sleeps) = maximumBy (\(_,a) (_,b) -> compare (length a) (length b)) gs
+              mostFreq    = head $ maximumBy (\a b -> compare (length a) (length b)) $ group sleeps
+
+
+-- Solution Part 2
+mostFrequentLength :: Eq a => [[a]] -> Int
+mostFrequentLength [] = 0
+mostFrequentLength xs = maximum $ (map length) xs
+
+part02 :: [Guard] -> Int
+part02 xs = id * mostFreq
+            where
+              gs          = map (\(id,ts) -> (id, group $ sort $ concatMap sleepingMinutes ts)) xs
+              (id,sleeps) = maximumBy (\(_,a) (_,b) -> compare (mostFrequentLength a) (mostFrequentLength b)) gs
+              mostFreq    = head $ maximumBy (\a b -> compare (length a) (length b)) sleeps
 
 
 solution :: IO ()
 solution = do putStr "Part 01: "
               guards <- parseInput <$> getInput "input_04.txt"            
               print $ part01 guards
-
+              putStr "Part 02: "
+              print $ part02 guards
+              
