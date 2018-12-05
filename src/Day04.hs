@@ -14,10 +14,10 @@ newtype Sleep = Sleep (UTCTime, UTCTime)
 type Guard = (Id, [Sleep])
 
 parseDateTimeStr :: String -> UTCTime
-parseDateTimeStr xs = fromJust $ (parseTimeM True defaultTimeLocale "%Y-%m-%d %H:%M" xs :: Maybe UTCTime)
+parseDateTimeStr xs = fromJust (parseTimeM True defaultTimeLocale "%Y-%m-%d %H:%M" xs :: Maybe UTCTime)
 
 duration :: Sleep -> Int
-duration (Sleep (from,to)) = abs $ (floor (sleepDuration / 60)) :: Int
+duration (Sleep (from,to)) = abs (floor (sleepDuration / 60)) :: Int
                              where
                                 sleepDuration = diffUTCTime to from
 
@@ -53,13 +53,13 @@ timestamp = do symbol "["
                return $ parseDateTimeStr time
 
 parseRow :: [String] -> Guard
-parseRow (x:xs) = (runParser guardId x, map (\[x,y] -> Sleep (x,y)) (chunk 2 $ fmap (runParser timestamp) xs))
+parseRow (x:xs) = (runParser guardId x, map (\[x,y] -> Sleep (x,y)) (chunk 2 $ map (runParser timestamp) xs))
 
 parseInput :: String -> [Guard]
 parseInput = groupRows . sortBy (\(a,_) (b,_) -> compare a b) . map parseRow . groupByGuard . sort . lines
 
 groupRows :: [Guard] -> [Guard]
-groupRows rs = map (\row -> foldl (\(id,ds) (id',ds') -> (id', ds ++ ds')) (0,[]) row) $ groupBy (\(a,_) (b,_) -> a == b) rs
+groupRows = map (foldl (\(_,ds) (id,ds') -> (id, ds ++ ds')) (0,[])) . groupBy (\(a,_) (b,_) -> a == b)
 
 
 -- Solution Part 1
@@ -74,7 +74,7 @@ part01 xs = id * mostFreq
 -- Solution Part 2
 mostFrequentLength :: Eq a => [[a]] -> Int
 mostFrequentLength [] = 0
-mostFrequentLength xs = maximum $ (map length) xs
+mostFrequentLength xs = maximum $ map length xs
 
 part02 :: [Guard] -> Int
 part02 xs = id * mostFreq
