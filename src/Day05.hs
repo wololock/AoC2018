@@ -25,7 +25,12 @@ part01 xs = if hasPolarization xs' then part01 xs' else xs'
             where
               xs' = removePolarization xs
 
+part02 :: String -> Int
+part02 xs = minimum [length $ part01 (filter (\c' -> toLower c' /= c) xs) | c <- ['a'..'z']]
+
 solution :: IO ()
-solution = do putStr "Part 01: ";
+solution = do putStr "Part 01: "
               input <- getInput "input_05.txt";
               print (length $ part01 input)
+              putStr "Part 02: "
+              print (part02 input)
