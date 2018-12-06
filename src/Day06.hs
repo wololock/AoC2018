@@ -65,6 +65,16 @@ part01 ps = maximum result
                 insiders          = filter (\p -> p /= p1 || p /= p2 || p /= p3 || p /= p4) candidates
                 result            = map length (group $ sort insiders)
 
+part02 :: Int -> [Pos] -> Int
+part02 n ps = length result
+              where
+                ((x1,y1),(x2,y2)) = range (edges ps)
+                r                 = n `div` length ps
+                area              = [(x,y) | x <- [(x1-r)..(x2+r)], y <- [(y1-r)..(y2+r)]]
+                inRadius p        = (sum [distance p p' | p' <- ps]) < n
+                result            = foldl (\acc p -> if inRadius p then p:acc else acc) [] area
+
+
 position :: Parser Pos
 position = do x <- int
               symbol ","
@@ -81,7 +91,7 @@ solution = do putStr "Part 01: "
               input <- parseInput <$> getInput "input_06.txt"      
               print $ part01 input
               putStr "Part 02: "
-              print 0
+              print $ part02 10000 input
 
 main :: IO ()
 main = solution
