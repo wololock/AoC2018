@@ -37,7 +37,7 @@ edges ps = (p1,p2,p3,p4)
             xs = sortBy (\(x,y) (x',y') -> compare x x' <> compare y' y) ps
             (p1,p2,p3,p4) = (head ys, last ys, head xs, last xs)
 
-range :: (Pos,Pos,Pos,Pos) -> ((Pos),(Pos))
+range :: (Pos,Pos,Pos,Pos) -> (Pos,Pos)
 range ((x1,y1),(x2,y2),(x3,y3),(x4,y4)) = ((x,y), (x',y'))
                                           where
                                             xs = [x1,x2,x3,x4]
@@ -47,7 +47,7 @@ range ((x1,y1),(x2,y2),(x3,y3),(x4,y4)) = ((x,y), (x',y'))
                                             y  = minimum ys
                                             y' = maximum ys
 
-singleClosest :: (Pos) -> [Pos] -> Maybe Pos
+singleClosest :: Pos -> [Pos] -> Maybe Pos
 singleClosest p ps = result
                      where
                         ds      = [(distance p p', p') | p' <- ps]
@@ -61,7 +61,7 @@ part01 ps = maximum result
                 (p1,p2,p3,p4)     = edges ps
                 ((x1,y1),(x2,y2)) = range (p1,p2,p3,p4)
                 area              = [(x,y) | x <- [(x1+1)..(x2-1)], y <- [(y1+1)..(y2-1)]] 
-                candidates        = map fromJust $ filter (/=Nothing) $ [singleClosest p ps | p <- area]
+                candidates        = map fromJust $ filter (/=Nothing) [singleClosest p ps | p <- area]
                 insiders          = filter (\p -> p /= p1 || p /= p2 || p /= p3 || p /= p4) candidates
                 result            = map length (group $ sort insiders)
 
@@ -71,7 +71,7 @@ part02 n ps = length result
                 ((x1,y1),(x2,y2)) = range (edges ps)
                 r                 = n `div` length ps
                 area              = [(x,y) | x <- [(x1-r)..(x2+r)], y <- [(y1-r)..(y2+r)]]
-                inRadius p        = (sum [distance p p' | p' <- ps]) < n
+                inRadius p        = sum [distance p p' | p' <- ps] < n
                 result            = foldl (\acc p -> if inRadius p then p:acc else acc) [] area
 
 
