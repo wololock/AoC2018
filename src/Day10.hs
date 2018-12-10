@@ -1,7 +1,6 @@
 import Commons
 import Parser
 import Data.List (minimumBy,maximumBy)
-import Control.Monad (when)
 
 type Pos = (Int,Int)
 
@@ -56,9 +55,20 @@ part01 ps = do if pointsInRadius 100 ps
                    else return ()
                part01 (movePoints ps)
 
+part02 :: [(Pos,Pos)] -> Int
+part02 ps = (countInternal ps 1) + 3
+            where
+                countInternal :: [(Pos,Pos)] -> Int -> Int
+                countInternal ps n = if pointsInRadius 100 moved then n else countInternal moved (n+1)
+                                     where
+                                        moved = movePoints ps
+ 
+
 solution :: IO ()
-solution = do putStr "Part 01: "
+solution = do putStr "Part 02: "
               input <- parseInput <$> getInput "input_10.txt"
+              print $ part02 input
+              wait 100000            
               part01 input
 
 main :: IO ()
