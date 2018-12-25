@@ -2,6 +2,11 @@ import Commons
 import Parser
 import Data.Bits ((.&.),(.|.))
 import Data.List.Split (splitOn)
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
+import Data.Set (Set)
+import qualified Data.Set as Set
+
 
 data Opcode = ADDR | ADDI | MULR | MULI | BANR | BANI | BORR | BORI | SETR | SETI | GTIR | GTRI | GTRR | EQIR | EQRI | EQRR
               deriving (Eq,Ord,Show)
@@ -83,17 +88,60 @@ parsePart01Input = do string "Before:"
                       string "]"
                       return ((a,b,c,d), (i1,i2,i3,i4), (a',b',c',d'))
 
+parsePart02Input :: Parser UnknownInstruct
+parsePart02Input = do op <- integer
+                      space
+                      a <- integer
+                      space
+                      b <- integer
+                      space 
+                      c <- integer
+                      takeUntil (/='\n')
+                      return (op,a,b,c)
 
-partO1 :: String -> Int
-partO1 input = length $ filter (>=3) $ map (length . resolveUnknownInstruction) unknows
+
+part01 :: String -> Int
+part01 input = length $ filter (>=3) $ map (length . resolveUnknownInstruction) unknows
     where
         unknows = map (runParser parsePart01Input) (splitOn "\n\n" input)
+
+part02 :: String -> String -> Int
+part02 input01 input02 = extractValue result
+    where
+        unknows :: [(Registry,UnknownInstruct,Registry)]
+        unknows = map (runParser parsePart01Input) (splitOn "\n\n" input01)     
+
+        grouped :: Map Int (Set Opcode)
+        grouped = foldl (\acc (l,(op,a,b,c),r) -> Map.insertWith Set.union op (Set.fromList $ resolveUnknownInstruction (l,(op,a,b,c),r)) acc) Map.empty unknows
+
+        resolveOpcodes :: Map Int (Set Opcode) -> Map Int (Set Opcode)
+        resolveOpcodes m
+            | length singles == Map.size m = m
+            | otherwise                    = resolveOpcodes m'
+            where
+                singles = foldl Set.union Set.empty $ Map.elems $ Map.filter (\x -> length x == 1) m
+                m'      = Map.map (\ops -> if length ops > 1 then ops `Set.difference` singles else ops) m
+
+        cache :: Map Int Opcode
+        cache = Map.map (Set.elemAt 0) $ resolveOpcodes grouped
+
+        program :: [UnknownInstruct]
+        program = map (runParser parsePart02Input) (tail $ lines input02)
+
+        result :: Registry
+        result = foldl (\reg (op,a,b,c) -> exec reg (cache Map.! op, a, b, c)) (0,0,0,0) program
+
+        extractValue :: Registry -> Int
+        extractValue (x,_,_,_) = x
+
 
 
 solution :: IO ()
 solution = do putStr "Part 01: "
               input <- splitOn "\n\n\n" <$> getInput "input_16.txt"
-              print $ partO1 (head input)
+              print $ part01 (head input)
+              putStr "Part 02: "
+              print $ part02 (head input) (input !! 1)
 
 main :: IO ()
 main = solution
