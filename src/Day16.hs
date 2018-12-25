@@ -106,7 +106,7 @@ part01 input = length $ filter (>=3) $ map (length . resolveUnknownInstruction) 
         unknows = map (runParser parsePart01Input) (splitOn "\n\n" input)
 
 part02 :: String -> String -> Int
-part02 input01 input02 = extractValue result
+part02 input01 input02 = get result 0
     where
         unknows :: [(Registry,UnknownInstruct,Registry)]
         unknows = map (runParser parsePart01Input) (splitOn "\n\n" input01)     
@@ -130,9 +130,6 @@ part02 input01 input02 = extractValue result
 
         result :: Registry
         result = foldl (\reg (op,a,b,c) -> exec reg (cache Map.! op, a, b, c)) (0,0,0,0) program
-
-        extractValue :: Registry -> Int
-        extractValue (x,_,_,_) = x
 
 
 
