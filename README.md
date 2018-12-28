@@ -9,6 +9,7 @@ I participate in 2018 AoC edition to learn Haskell better.
 ```
       -------Part 1--------   -------Part 2--------
 Day       Time  Rank  Score       Time  Rank  Score
+ 17       >24h  4264      0       >24h  4237      0
  16       >24h  6355      0       >24h  6132      0
  14   04:51:03  3039      0   09:50:32  3582      0
  13   08:02:39  2773      0   09:37:56  2602      0
