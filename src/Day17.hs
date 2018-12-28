@@ -34,8 +34,8 @@ parser = do var1 <- letter
         
 
 
-start :: Pos -> HashSet Pos -> (HashSet Pos, HashSet Pos)
-start (x,y) clays = run [Fall (x,y)] Set.empty Set.empty
+solve :: Pos -> HashSet Pos -> (HashSet Pos, HashSet Pos)
+solve (x,y) clays = run [Fall (x,y)] Set.empty Set.empty
     where
         maxY :: Int
         maxY = foldl (\y (_,y') -> if y' > y then y' else y) 0 clays
@@ -52,7 +52,7 @@ start (x,y) clays = run [Fall (x,y)] Set.empty Set.empty
             where
                 stream  = takeWhile p [(x,y') | y' <- [y..]]
                 p (x,y) = y < maxY && not ((x,y) `Set.member` clays || (x,y) `Set.member` water)
-                trail'  = trail `Set.union` (Set.fromList stream)
+                trail'  = trail `Set.union` Set.fromList stream
                 fs'     | null stream                   = []
                         | y' >= maxY                    = []
                         | (x',y'+1) `Set.member` clays  = [Fill (x',y')]
@@ -85,8 +85,8 @@ start (x,y) clays = run [Fall (x,y)] Set.empty Set.empty
 solution :: IO ()
 solution = do putStr "Part 01: "
               clays <- parseInput <$> getInput "input_17.txt"
-              let (water,trail) = start (500,1) clays
-              print $ Set.size $ water `Set.union` trail
+              let (water,trail) = solve (500,1) clays
+              print $ Set.size (water `Set.union` trail)
               putStr "Part 02: "
               print $ Set.size water
 
