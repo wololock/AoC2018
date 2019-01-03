@@ -1,8 +1,7 @@
 import Commons
-import Parser
 import Data.Array
-import Data.List (sort, group)
-import Data.Maybe (fromJust)
+import Data.List (sort,group,elemIndex)
+import Data.Maybe (fromMaybe)
 
 type Pos = (Int,Int)
 type Area = Array Pos Char
@@ -49,11 +48,25 @@ part01 area n = run area 0
                 area' = array ((0,0),(size,size)) [((x,y), transform (area ! (x,y)) (adjacents area (x,y))) | x <- [0..size], y <- [0..size]]
 
 
+part02 :: Area -> Int -> Int
+part02 area n = run area 0 0 []
+    where
+        (_,(size,_)) = bounds area
+        run area i idx acc
+            | cycle > 0 && idx == cycle && n `mod` cycle == i `mod` cycle = value
+            | otherwise = run area' (i+1) cycle (acc ++ [value])
+            where
+                area' = array ((0,0),(size,size)) [((x,y), transform (area ! (x,y)) (adjacents area (x,y))) | x <- [0..size], y <- [0..size]]
+                value = product $ map length $ group $ sort $ filter (/='.') $ elems area
+                cycle = i - fromMaybe 0 (elemIndex value acc)
+                
 
 solution :: IO ()
 solution = do putStr "Part 01: "
               input <- text2Area . lines <$> getInput "input_18.txt"
               print $ part01 input 10
+              putStr "Part 02: "
+              print $ part02 input 1000000000
 
 main :: IO ()
 main = solution
