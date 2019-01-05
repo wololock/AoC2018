@@ -65,18 +65,36 @@ exec reg (op,a,b,c) = case op of
     EQRR -> set reg c (if get reg a == get reg b then 1 else 0)
 
 
-part01 :: Int -> Map Int Instruction -> Int
-part01 ip instructions = run (0,0,0,0,0,0)
+execInstructions :: Int -> Map Int Instruction -> Int -> Registry -> (Int,Registry)
+execInstructions ip instructions limit reg = run reg 0
     where
-        run :: Registry -> Int
-        run reg 
-            | isNothing instruction = get reg 0
-            | otherwise             = run reg''
+        run :: Registry -> Int -> (Int,Registry)
+        run reg n
+            | n == limit            = (n, reg)
+            | isNothing instruction = (n, reg)
+            | otherwise             = run reg'' (n+1)
             where
                 instruction = Map.lookup (get reg ip) instructions
                 reg'        = exec reg (fromJust instruction)
                 inum        = 1 + get reg' ip
                 reg''       = set reg' ip inum
+
+part01 :: Int -> Map Int Instruction -> Int
+part01 ip instructions = result
+    where
+        (_,(result,_,_,_,_,_)) = execInstructions ip instructions (-1) (0,0,0,0,0,0)
+
+-- Program jumps into loop 10551282 * 10551282 size and it sums
+-- divisors of number 10551282. The following implemention simplfies 
+-- the problem to:
+-- a. finding 10551282 number
+-- b. calculating sum of divisors of that number
+part02 :: Int -> Map Int Instruction -> Int
+part02 ip instructions = result
+    where
+        (_,(_,_,n,_,_,_)) = execInstructions ip instructions 32 (1,0,0,0,0,0)
+        result = foldl (\acc i -> if n `mod` i == 0 then acc + i else acc) 0 [1..n+1]
+
         
 
 solution :: IO ()
@@ -85,6 +103,8 @@ solution = do putStr "Part 01: "
               let ip = runParser ipParser (head input)
               let instructions = Map.fromList $ zip [0..] (map (runParser instructionParser) $ tail input)
               print $ part01 ip instructions
+              putStr "Part 02: "
+              print $ part02 ip instructions
 
 main :: IO ()
 main = solution
