@@ -93,7 +93,7 @@ part02 :: Int -> Map Int Instruction -> Int
 part02 ip instructions = result
     where
         (_,(_,_,n,_,_,_)) = execInstructions ip instructions 32 (1,0,0,0,0,0)
-        result = foldl (\acc i -> if n `mod` i == 0 then acc + i else acc) 0 [1..n+1]
+        result = foldl (\acc i -> if n `mod` i == 0 then acc + i else acc) 0 [1..n]
 
         
 
