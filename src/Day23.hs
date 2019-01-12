@@ -33,7 +33,8 @@ part01 bots = sum [1 | (p',r') <- bots, distance p p' <= r]
 start :: Pos
 start = (0,0,0)
 
-part02' bots = run step (x1,y1,z1) (x2,y2,z2)
+part02 :: [Bot] -> Int
+part02 bots = run step (x1,y1,z1) (x2,y2,z2)
     where
         ((x1,_,_),_) = minimumBy (\((x,_,_),_) ((x',_,_),_) -> compare x x') bots
         ((x2,_,_),_) = maximumBy (\((x,_,_),_) ((x',_,_),_) -> compare x x') bots
@@ -44,16 +45,16 @@ part02' bots = run step (x1,y1,z1) (x2,y2,z2)
         factor       = 2
         step         = 10000000
 
-        --run :: Int -> Pos -> Pos -> Pos
-        run step from' to' | trace ("run -> " ++ show step ++ " -> " ++ show from' ++ " -> " ++ show to') False = undefined
+        run :: Int -> Pos -> Pos -> Int
+        -- run step from' to' | trace ("run -> " ++ show step ++ " -> " ++ show from' ++ " -> " ++ show to') False = undefined
         run step (x1,y1,z1) (x2,y2,z2)
-            | step <= 1 = ((x',y',z'),n,d)
+            | step <= 1 = d
             | otherwise = run (step `div` factor) from' to'
             where
                 list             = [(x,y,z) | x <- [x1,(x1+step)..x2], y <- [y1,(y1+step)..y2], z <- [z1,(z1+step)..z2]]
                 ((x',y',z'),n,d) = foldl findBest (start, 0, maxBound :: Int) list
 
-                margin = step * factor
+                margin = (step * factor) - 1
                 from'  = (x'-margin, y'-margin, z'-margin)
                 to'    = (x'+margin, y'+margin, z'+margin)
 
@@ -67,32 +68,12 @@ part02' bots = run step (x1,y1,z1) (x2,y2,z2)
                         d' = distance start p'
 
                 intersectionSize :: Pos -> Int
-                intersectionSize p = length $ filter (\b -> p `isInside` b) bots
-
-
--- Part 02: ((45737390,19799677,43081734),983,108618801) <-- winner
--- Part 02: ((44623832,20979837,40788016),918,106391685)
--- Part 02: ((43389173,17610161,36004468),983,97003802)
--- Part 02: ((43389173,17610161,36004468),983,97003802)
--- Part 02: ((43389173,17610161,36004468),983,97003802)
+                intersectionSize p = length $ filter (\b -> inRange p b margin) bots
 
 
 
-
--- 120284879
-
--- 97003802 
--- 97003802
-
-
-
-isInside :: Pos -> Bot -> Bool
-isInside (x,y,z) ((x',y',z'),r) = d - r < 0 && d + r > 0
-    where
-        d = abs (x-x') + abs (y-y') + abs (z-z')
--- isInside (x,y,z) ((x',y',z'),r) = abs (x-x') + abs (y-y') + abs (z-z') <= r
--- isInside (x,y,z) ((x',y',z'),r) = distance (x,y,z) (x',y',z') < r
--- isInside (x,y,z) ((x',y',z'),r) = (x-x')^2 + (y-y')^2 + (z-z')^2 < r^2
+inRange :: Pos -> Bot -> Int -> Bool
+inRange (x,y,z) ((x',y',z'),r) padding = abs (x-x') + abs (y-y') + abs (z-z') < r + padding
 
 
 solution :: IO ()
@@ -100,18 +81,7 @@ solution = do putStr "Part 01: "
               input <- map (runParser inputParser) . lines <$> getInput "input_23.txt"
               print $ part01 input
               putStr "Part 02: "
-              print $ part02' input
-              --mapM_ print (part02 input)
+              print $ part02 input
 
 main :: IO ()
 main = solution
-
--- Part 02: 8505705327168674990
--- Part 02: 6011898498614420980
--- Part 02: 13646030329425600
-
--- r = 50012575
-
--- Part 02: 373711403 x
--- Part 02: 225195342 x
--- Part 02: 125170192 x
